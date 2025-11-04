@@ -571,6 +571,7 @@ header {
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
   opacity: 0;
   transition: all 0.3s ease;
+  z-index: -1;
 }
 
 .hero::before {
