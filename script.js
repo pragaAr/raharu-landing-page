@@ -361,28 +361,99 @@ navLinks.forEach((link) => {
 });
 
 // Tracking functionality
+const form = document.getElementById('trackingForm');
+const modal = document.getElementById('resultModal');
+const closeModal = document.getElementById('closeModal');
+
 const trackButton = document.getElementById('trackButton');
 const trackingNumber = document.getElementById('trackingNumber');
 
-trackButton.addEventListener('click', () => {
-  if (trackingNumber.value.trim() === '') {
-    alert('Silakan masukkan nomor resi terlebih dahulu');
-    trackingNumber.focus();
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const trackingNumber = document.getElementById('trackingNumber').value.trim();
+
+  if (!trackingNumber) {
+    const input = document.getElementById('trackingNumber');
+    input.classList.add('error');
+    input.placeholder = 'Nomor resi wajib diisi !';
     return;
   }
 
-  // Simulasi pencarian tracking
-  alert(
-    `Mencari status pengiriman untuk resi: ${trackingNumber.value}\n\nFitur tracking sedang dalam pengembangan.`
+  // Contoh data timeline statis
+  const timelineData = [
+    {
+      date: '2025-11-01 08:20',
+      status: 'Paket diterima di gudang pusat Jakarta',
+    },
+    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
+    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
+    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
+    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
+    { date: '2025-11-02 07:35', status: 'Paket tiba di gudang Semarang' },
+    { date: '2025-11-02 11:15', status: 'Kurir sedang menuju alamat penerima' },
+    { date: '2025-11-02 14:05', status: 'Paket telah diterima oleh penerima' },
+  ];
+
+  showModal(
+    `Status pengiriman untuk resi <b>${trackingNumber}</b>`,
+    timelineData
   );
 });
 
-// Enter key untuk tracking
-trackingNumber.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    trackButton.click();
-  }
-});
+function showModal(title, timelineData) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'modal-wrapper';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-content';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close';
+  closeBtn.innerHTML = '&times;';
+
+  // isi timeline
+  const timelineHTML = timelineData?.length
+    ? `<div class="timeline">
+        ${timelineData
+          .map(
+            (item) => `
+          <div class="timeline-item">
+            <p class="timeline-date">${item.date}</p>
+            <p class="timeline-status">${item.status}</p>
+          </div>`
+          )
+          .join('')}
+      </div>`
+    : `<p>Tidak ada data pengiriman ditemukan.</p>`;
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <h3>${title}</h3>
+    </div>
+    ${timelineHTML}
+  `;
+
+  // susun struktur DOM
+  wrapper.appendChild(modal);
+  wrapper.appendChild(closeBtn);
+  overlay.appendChild(wrapper);
+  document.body.appendChild(overlay);
+
+  document.body.style.overflow = 'hidden';
+
+  const closeModal = () => {
+    overlay.remove();
+    document.body.style.overflow = '';
+  };
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+}
 
 // Offices functionality
 const officesGrid = document.getElementById('officesGrid');
