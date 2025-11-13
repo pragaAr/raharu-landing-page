@@ -303,6 +303,15 @@ function toggleMobileMenu() {
 mobileMenu.addEventListener('click', toggleMobileMenu);
 mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
 
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    mobileNav.classList.remove('active');
+    mobileMenuOverlay.classList.remove('active');
+    body.classList.remove('menu-open');
+    mobileMenu.textContent = '☰';
+  }
+});
+
 // Go to Top Button
 const goToTopBtn = document.getElementById('goToTop');
 

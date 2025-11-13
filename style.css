@@ -240,7 +240,6 @@ header {
   margin-top: 30px;
   padding: 15px;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(5px);
   border: none;
   border-radius: 30px;
   color: var(--text);
@@ -564,8 +563,6 @@ header {
     rgba(255, 0, 0, 0.473),
     rgba(0, 60, 255, 0.445)
   );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   filter: blur(30px) saturate(140%);
   border-radius: 50%;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
@@ -578,7 +575,7 @@ header {
   content: '';
   position: absolute;
   left: -60px;
-  bottom: 30px;
+  bottom: 45px;
   width: 120px;
   height: 120px;
   background: linear-gradient(
@@ -586,8 +583,7 @@ header {
     rgba(255, 0, 0, 0.473),
     rgba(0, 60, 255, 0.445)
   );
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+
   filter: blur(30px) saturate(140%);
   border-radius: 50%;
   box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
@@ -641,7 +637,6 @@ header {
 
 .service-icon {
   font-size: 2.5rem;
-  margin-bottom: 20px;
   color: #e53935;
 }
 
@@ -735,12 +730,14 @@ header {
   padding: 25px;
   border-radius: 15px;
   box-shadow: 0 8px 25px var(--shadow);
+  border: 2px solid #8e858552;
+
   transition: all 0.3s;
 }
 
 .office-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 30px var(--shadow);
+  box-shadow: 0 22px 30px var(--shadow);
 }
 
 .office-header {
@@ -947,7 +944,6 @@ footer {
   visibility: hidden;
   transition: all 0.3s;
   z-index: 999;
-  box-shadow: 0 5px 15px rgba(229, 57, 53, 0.3);
 }
 
 .go-to-top.active {
@@ -990,14 +986,8 @@ footer {
     opacity: 1;
   }
 
-  .hero {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08),
-      rgba(255, 255, 255, 0.02)
-    );
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  .hero-text {
+    text-align: center;
   }
 
   .nav-links {
