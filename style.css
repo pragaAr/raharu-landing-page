@@ -286,7 +286,6 @@ header {
   padding: 25px;
   border-radius: 15px;
   box-shadow: 0 10px 30px var(--shadow);
-  margin-bottom: 15px;
 }
 
 .tracking-form h3 {
@@ -1035,7 +1034,6 @@ footer {
     width: auto;
     margin-right: 10px;
     white-space: nowrap;
-    flex-shrink: 0;
     cursor: pointer;
     transition: all 0.3s ease;
   }
