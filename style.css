@@ -95,8 +95,9 @@ header {
 
 .logo-footer img {
   width: 120px;
+  padding-top: 5px;
   vertical-align: middle;
-  margin-bottom: 30px;
+  margin-bottom: 23px;
 }
 .nav-links {
   display: flex;
@@ -618,6 +619,7 @@ header {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
+  align-items: stretch;
 }
 
 .service-card {
@@ -628,6 +630,7 @@ header {
   box-shadow: 0 10px 30px var(--shadow);
   transition: transform 0.3s;
   text-align: center;
+  height: 100%;
 }
 
 .service-card:hover {
@@ -644,6 +647,9 @@ header {
   margin-bottom: 15px;
 }
 
+.service-card p {
+  opacity: 0.85;
+}
 /* Offices Section */
 .offices {
   padding: 100px 0;
@@ -866,6 +872,21 @@ header {
   margin-left: 5px;
 }
 
+form.form-pricelist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-pricelist .form-input {
+  flex: 1;
+  width: auto;
+}
+
+.form-pricelist button {
+  padding: 12px 24px;
+}
+
 /* Footer */
 footer {
   padding: 70px 0 20px;
@@ -876,12 +897,20 @@ footer {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 40px;
   margin-bottom: 50px;
+  align-items: start;
+}
+
+.footer-column .logo-footer-desc {
+  color: var(--text);
+  opacity: 0.8;
+  transition: opacity 0.3s;
 }
 
 .footer-column h3 {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   margin-bottom: 20px;
   position: relative;
+  text-transform: uppercase;
 }
 
 .footer-column h3::after {
@@ -1042,6 +1071,11 @@ footer {
     width: 200px;
     text-align: center;
   }
+
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1061,5 +1095,11 @@ footer {
     position: absolute;
     left: -50px;
     transform: translateX(-32%);
+  }
+
+  @media (max-width: 480px) {
+    .services-grid {
+      grid-template-columns: 1fr;
+    }
   }
 }

@@ -403,13 +403,13 @@ form.addEventListener('submit', (e) => {
     { date: '2025-11-02 14:05', status: 'Paket telah diterima oleh penerima' },
   ];
 
-  showModal(
+  showModalCekReccu(
     `Status pengiriman untuk resi <b>${trackingNumber}</b>`,
     timelineData
   );
 });
 
-function showModal(title, timelineData) {
+function showModalCekReccu(title, timelineData) {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
 
@@ -593,3 +593,57 @@ officeSearch.addEventListener('input', (e) => {
 
 // Initial render
 renderOffices();
+
+const btnPricelist = document.getElementById('btnPricelist');
+
+btnPricelist.addEventListener('click', () => {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'modal-wrapper';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-content';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close';
+  closeBtn.innerHTML = '&times;';
+
+  const formHtml = `
+      <form class="form-group form-pricelist"> 
+        <input type="text" name="kota_asal" id="kota_asal" class="form-input" placeholder="Kota asal" />
+        <input type="text" name="kota_tujuan" id="kota_tujuan" class="form-input" placeholder="Kota tujuan" />
+        <button class="btn btn-primary">Cek</button>
+      </form>
+  `;
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <h3>Cek Pricelist</h3>
+    </div>
+    ${formHtml}
+  `;
+
+  // susun struktur DOM
+  wrapper.appendChild(modal);
+  wrapper.appendChild(closeBtn);
+  overlay.appendChild(wrapper);
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => {
+    document.querySelector('#kota_asal')?.focus();
+  });
+
+  document.body.style.overflow = 'hidden';
+
+  const closeModal = () => {
+    overlay.remove();
+    document.body.style.overflow = '';
+  };
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+});
