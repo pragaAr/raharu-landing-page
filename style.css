@@ -238,8 +238,8 @@ header {
 }
 
 .mobile-theme-toggle {
-  margin-top: 30px;
   padding: 15px;
+  margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 30px;
@@ -249,7 +249,6 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
 }
 
 /* Hero Section */
