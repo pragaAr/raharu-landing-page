@@ -714,7 +714,7 @@ header {
   border: 1px solid rgba(78, 78, 78, 0.25);
   border-radius: 15px;
   font-size: 0.9rem;
-  background: var(--secondary);
+  background: var(--primary);
   color: var(--text);
 }
 
