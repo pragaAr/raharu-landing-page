@@ -907,10 +907,15 @@ footer {
 }
 
 .footer-column h3 {
+  color: #1f1d56e7;
   font-size: 1.25rem;
   margin-bottom: 20px;
   position: relative;
   text-transform: uppercase;
+}
+
+.dark-theme .footer-column h3 {
+  color: #fff;
 }
 
 .footer-column h3::after {
