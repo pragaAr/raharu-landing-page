@@ -636,8 +636,13 @@ header {
 }
 
 .service-card:hover {
-  border: 1px solid rgba(78, 78, 78, 0.7);
+  border: 1px solid rgba(78, 78, 78, 0.5);
   box-shadow: 0 0 5px rgba(78, 78, 78, 0.37);
+}
+
+.dark-theme .service-card:hover {
+  border: 1px solid rgba(233, 232, 232, 0.5);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.37);
 }
 
 .service-icon {
@@ -739,8 +744,12 @@ header {
 }
 
 .office-card:hover {
-  border: 1px solid rgba(78, 78, 78, 0.7);
+  border: 1px solid rgba(78, 78, 78, 0.5);
   box-shadow: 0 0 5px rgba(78, 78, 78, 0.37);
+}
+.dark-theme .office-card:hover {
+  border: 1px solid rgba(233, 232, 232, 0.5);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.37);
 }
 
 .office-header {
@@ -760,7 +769,6 @@ header {
 .office-type {
   background: #e1eeff;
   padding: 4px 12px;
-  backdrop-filter: blur(20px);
   border-radius: 15px;
   font-size: 0.8rem;
   font-weight: 500;
@@ -768,7 +776,7 @@ header {
 }
 
 .dark-theme .office-type {
-  background: #3b060f85;
+  background: #3b060fd8;
 }
 
 .office-address {
