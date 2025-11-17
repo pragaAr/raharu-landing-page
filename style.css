@@ -122,11 +122,11 @@ header {
 }
 
 .nav-links a:hover {
-  color: #e53935;
+  color: #b71c1c;
 }
 
 .nav-link.active {
-  color: #e53935;
+  color: #c62828;
 }
 
 .nav-buttons .btn {
@@ -292,7 +292,7 @@ header {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
-.tracking-form h3 {
+.tracking-form h2 {
   margin-bottom: 15px;
   color: var(--text);
   font-size: 1.3rem;
@@ -515,12 +515,12 @@ header {
 }
 
 .btn-primary {
-  background: #e53935;
+  background: #c62828;
   color: #fff;
 }
 
 .btn-primary:hover {
-  background: #c62828;
+  background: #b71c1c;
 }
 
 .btn-secondary {
@@ -687,7 +687,7 @@ header {
 }
 
 .region-filter.active {
-  background: #e53935;
+  background: #c62828;
   color: #fff;
   border-color: transparent;
 }
@@ -753,7 +753,7 @@ header {
 
 .office-header {
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 15px;
 }
@@ -761,12 +761,13 @@ header {
 .office-city {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #e53935;
+  color: var(--text);
   margin-bottom: 5px;
 }
 
 .office-type {
-  background: #e1eeff;
+  background: #b7d4ff;
+  color: #1a1a1a;
   padding: 4px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
@@ -775,7 +776,8 @@ header {
 }
 
 .dark-theme .office-type {
-  background: #3b060fd8;
+  background: #6e0f20;
+  color: #fff;
 }
 
 .office-address {
@@ -825,7 +827,7 @@ header {
 }
 
 .page-btn.active {
-  background: #e53935;
+  background: #c62828;
   color: #fff;
   border: 2px solid transparent;
 }
@@ -870,13 +872,15 @@ header {
   opacity: 0.9;
 }
 
-.cta-pricelist button {
-  background: none;
-  border: none;
-  color: #e53935;
+.cta-pricelist a {
+  color: #c62828;
   font-weight: 600;
   cursor: pointer;
   margin-left: 5px;
+}
+
+.cta-pricelist a:hover {
+  color: #b71c1c;
 }
 
 form.form-pricelist {
@@ -973,7 +977,7 @@ footer {
   right: 30px;
   width: 40px;
   height: 40px;
-  background: #e53935;
+  background: #c62828;
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -992,7 +996,7 @@ footer {
 }
 
 .go-to-top:hover {
-  background: #c62828;
+  background: #b71c1c;
   transform: translateY(-5px);
 }
 
