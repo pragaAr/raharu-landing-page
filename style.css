@@ -632,7 +632,7 @@ header {
 }
 
 .service-card:hover {
-  border: 1px solid rgba(78, 78, 78, 0.4);
+  border: 1px solid rgba(78, 78, 78, 0.7);
   box-shadow: 0 0 5px rgba(78, 78, 78, 0.37);
 }
 
@@ -735,7 +735,7 @@ header {
 }
 
 .office-card:hover {
-  border: 1px solid rgba(78, 78, 78, 0.4);
+  border: 1px solid rgba(78, 78, 78, 0.7);
   box-shadow: 0 0 5px rgba(78, 78, 78, 0.37);
 }
 
