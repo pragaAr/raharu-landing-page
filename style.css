@@ -290,7 +290,7 @@ header {
   padding: 25px;
   border-radius: 15px;
   border: 1px solid rgba(78, 78, 78, 0.25);
-  box-shadow: 0 2px 6px rgba(78, 78, 78, 0.15);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .tracking-form h3 {
@@ -358,7 +358,7 @@ header {
 .modal-content {
   background: rgba(235, 235, 235, 0.945);
   border: 1px solid rgba(78, 78, 78, 0.25);
-  box-shadow: 0 2px 6px rgba(78, 78, 78, 0.15);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
   border-radius: 15px;
   padding: 24px 32px;
   max-width: 600px;
@@ -542,7 +542,7 @@ header {
 .hero-image img {
   max-width: 100%;
   border-radius: 10px;
-  box-shadow: 0 15px 30px var(--shadow);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 /* Decorative circle for mobile view */
@@ -628,10 +628,11 @@ header {
   padding: 30px;
   border-radius: 15px;
   border: 1px solid rgba(78, 78, 78, 0.25);
-  box-shadow: 0 2px 6px rgba(78, 78, 78, 0.15);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
   transition: transform 0.3s;
   text-align: center;
   height: 100%;
+  transition: all 0.3s;
 }
 
 .service-card:hover {
@@ -733,7 +734,7 @@ header {
   padding: 25px;
   border-radius: 15px;
   border: 1px solid rgba(78, 78, 78, 0.25);
-  box-shadow: 0 2px 6px rgba(78, 78, 78, 0.15);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
   transition: all 0.3s;
 }
 
