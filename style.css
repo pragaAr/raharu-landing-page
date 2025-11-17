@@ -48,6 +48,11 @@ body.menu-open {
   overflow: hidden;
 }
 
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .container {
   width: 90%;
   max-width: 1200px;
