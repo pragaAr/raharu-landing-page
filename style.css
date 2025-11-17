@@ -766,8 +766,8 @@ header {
 }
 
 .office-type {
-  background: #b7d4ff;
-  color: #1a1a1a;
+  background: rgba(224, 37, 37, 0.15);
+  color: #e02525;
   padding: 4px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
