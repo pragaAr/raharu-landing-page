@@ -314,20 +314,41 @@ window.addEventListener('resize', () => {
 
 // Go to Top Button
 const goToTopBtn = document.getElementById('goToTop');
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
 
-window.addEventListener('scroll', () => {
-  if (window.pageYOffset > 300) {
-    goToTopBtn.classList.add('active');
-  } else {
-    goToTopBtn.classList.remove('active');
-  }
-});
+const observerOptions = {
+  threshold: 0.4, // 40% terlihat = dianggap active
+};
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+
+    const id = entry.target.getAttribute('id');
+
+    navLinks.forEach((link) => {
+      link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+    });
+  });
+}, observerOptions);
+
+sections.forEach((sec) => sectionObserver.observe(sec));
+
+window.addEventListener(
+  'scroll',
+  () => {
+    if (window.pageYOffset > 300) {
+      goToTopBtn.classList.add('active');
+    } else {
+      goToTopBtn.classList.remove('active');
+    }
+  },
+  { passive: true }
+);
 
 goToTopBtn.addEventListener('click', () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
-  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 // Close mobile menu when clicking on a link
@@ -337,27 +358,6 @@ document.querySelectorAll('.mobile-nav-links a').forEach((link) => {
     mobileMenuOverlay.classList.remove('active');
     body.classList.remove('menu-open');
     mobileMenu.textContent = '☰';
-  });
-});
-
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-link');
-
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach((section) => {
-    const sectionTop = section.offsetTop - 120; // jarak agar lebih presisi
-    const sectionHeight = section.clientHeight;
-    if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-      current = section.getAttribute('id');
-    }
-  });
-
-  navLinks.forEach((link) => {
-    link.classList.remove('active');
-    if (link.getAttribute('href') === `#${current}`) {
-      link.classList.add('active');
-    }
   });
 });
 
