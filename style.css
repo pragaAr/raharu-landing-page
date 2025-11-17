@@ -287,7 +287,6 @@ header {
 
 .tracking-form {
   background: var(--secondary);
-  backdrop-filter: blur(40px);
   padding: 25px;
   border-radius: 15px;
   border: 1px solid rgba(78, 78, 78, 0.25);
@@ -626,7 +625,6 @@ header {
 
 .service-card {
   background: var(--secondary);
-  backdrop-filter: blur(40px);
   padding: 30px;
   border-radius: 15px;
   border: 1px solid rgba(78, 78, 78, 0.25);
