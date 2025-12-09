@@ -1153,13 +1153,6 @@ footer {
   margin: 0 auto 15px;
 }
 
-.loader-content p {
-  color: var(--text);
-  font-weight: 500;
-  letter-spacing: 2px;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
