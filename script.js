@@ -647,3 +647,19 @@ btnPricelist.addEventListener('click', () => {
     if (e.target === overlay) closeModal();
   });
 });
+
+// Loader Functionality
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loader');
+
+  // Ensure smooth transition
+  setTimeout(() => {
+    loader.classList.add('hidden');
+
+    // Remove from DOM after transition
+    setTimeout(() => {
+      loader.style.display = 'none';
+      document.body.classList.remove('menu-open'); // Ensure scroll is enabled
+    }, 500);
+  }, 800); // Minimal load time of 800ms
+});
