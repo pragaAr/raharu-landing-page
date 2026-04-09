@@ -5,7 +5,7 @@ const officesData = [
     city: 'Jakarta Pusat',
     address: 'Jl. Thamrin No. 10, Jakarta Pusat 10340',
     phone: '(021) 1234-5678',
-    type: 'Kantor Pusat',
+    type: 'Pusat',
     region: 'jawa',
   },
   {
@@ -252,8 +252,6 @@ const logo = document.querySelectorAll('.logo-img');
 const currentTheme = localStorage.getItem('theme') || 'light';
 if (currentTheme === 'dark') {
   body.classList.add('dark-theme');
-  themeToggle.textContent = '☀️';
-  mobileThemeToggle.innerHTML = '<span>☀️</span>';
   logo.forEach((img) => {
     img.src = 'img/raharu-dark.png';
   });
@@ -266,8 +264,6 @@ if (currentTheme === 'dark') {
 function toggleTheme() {
   body.classList.toggle('dark-theme');
   const isDark = body.classList.contains('dark-theme');
-  themeToggle.textContent = isDark ? '☀️' : '🌙';
-  mobileThemeToggle.innerHTML = isDark ? '<span>☀️</span>' : '<span>🌙</span>';
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   logo.forEach((img) => {
     img.src = isDark ? 'img/raharu-dark.png' : 'img/raharu-light.png';
@@ -344,7 +340,7 @@ window.addEventListener(
       goToTopBtn.classList.remove('active');
     }
   },
-  { passive: true }
+  { passive: true },
 );
 
 goToTopBtn.addEventListener('click', () => {
@@ -405,7 +401,7 @@ form.addEventListener('submit', (e) => {
 
   showModalCekReccu(
     `Status pengiriman untuk resi <b>${trackingNumber}</b>`,
-    timelineData
+    timelineData,
   );
 });
 
@@ -432,7 +428,7 @@ function showModalCekReccu(title, timelineData) {
           <div class="timeline-item">
             <p class="timeline-date">${item.date}</p>
             <p class="timeline-status">${item.status}</p>
-          </div>`
+          </div>`,
           )
           .join('')}
       </div>`
@@ -563,14 +559,14 @@ function searchOffices(query) {
     filteredOffices = officesData.filter(
       (office) =>
         office.city.toLowerCase().includes(lowerQuery) ||
-        office.address.toLowerCase().includes(lowerQuery)
+        office.address.toLowerCase().includes(lowerQuery),
     );
   } else {
     filteredOffices = officesData.filter(
       (office) =>
         office.region === currentRegion &&
         (office.city.toLowerCase().includes(lowerQuery) ||
-          office.address.toLowerCase().includes(lowerQuery))
+          office.address.toLowerCase().includes(lowerQuery)),
     );
   }
 
