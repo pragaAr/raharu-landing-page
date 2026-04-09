@@ -58,7 +58,6 @@
   --shadow-md: 0 10px 24px rgba(15, 27, 61, 0.12);
   --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 18px;
   --radius-pill: 999px;
   --ease-out: 0.2s ease;
 
@@ -507,7 +506,7 @@ header {
 .modal-content {
   background: var(--secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   padding: 24px 32px;
   max-width: 600px;
   width: 90vw;
