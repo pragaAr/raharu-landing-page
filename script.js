@@ -535,7 +535,7 @@ form.addEventListener('submit', async (e) => {
     showTrackingModal(
       trackingCode,
       null,
-      'Tidak dapat terhubung ke server tracking. Pastikan aplikasi SIMPUL berjalan, lalu coba lagi.',
+      'Tidak dapat terhubung ke server tracking. Pastikan backend berjalan, lalu coba lagi.',
     );
   } finally {
     trackButton.disabled = false;
