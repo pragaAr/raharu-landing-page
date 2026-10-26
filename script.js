@@ -244,9 +244,9 @@ const officesData = [
 
 // Theme Toggle
 const themeToggle = document.getElementById('themeToggle');
-const mobileThemeToggle = document.getElementById('mobileThemeToggle');
 const body = document.body;
 const logo = document.querySelectorAll('.logo-img');
+let themeTransitionTimeout;
 
 // Check for saved theme preference or default to light
 const currentTheme = localStorage.getItem('theme') || 'light';
@@ -261,7 +261,7 @@ if (currentTheme === 'dark') {
   });
 }
 
-function toggleTheme() {
+function applyThemeChange() {
   body.classList.toggle('dark-theme');
   const isDark = body.classList.contains('dark-theme');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -270,66 +270,183 @@ function toggleTheme() {
   });
 }
 
-themeToggle.addEventListener('click', toggleTheme);
-mobileThemeToggle.addEventListener('click', toggleTheme);
+function toggleTheme(event) {
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)',
+  ).matches;
 
-// Mobile Menu Toggle
-const mobileMenu = document.getElementById('mobileMenu');
-const mobileNav = document.getElementById('mobileNav');
-const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+  if (
+    !prefersReducedMotion &&
+    typeof document.startViewTransition === 'function'
+  ) {
+    const buttonRect = themeToggle.getBoundingClientRect();
+    const originX =
+      event.detail === 0
+        ? buttonRect.left + buttonRect.width / 2
+        : event.clientX;
+    const originY =
+      event.detail === 0
+        ? buttonRect.top + buttonRect.height / 2
+        : event.clientY;
 
-function toggleMobileMenu() {
-  const isMenuOpen = mobileNav.classList.contains('active');
-
-  if (isMenuOpen) {
-    // Tutup menu
-    mobileNav.classList.remove('active');
-    mobileMenuOverlay.classList.remove('active');
-    body.classList.remove('menu-open');
-    mobileMenu.textContent = '☰';
-  } else {
-    // Buka menu
-    mobileNav.classList.add('active');
-    mobileMenuOverlay.classList.add('active');
-    body.classList.add('menu-open');
-    mobileMenu.textContent = '✕';
+    document.documentElement.style.setProperty(
+      '--theme-reveal-x',
+      `${originX}px`,
+    );
+    document.documentElement.style.setProperty(
+      '--theme-reveal-y',
+      `${originY}px`,
+    );
+    document.startViewTransition(applyThemeChange);
+    return;
   }
+
+  if (!prefersReducedMotion) {
+    body.classList.add('theme-transition');
+    window.clearTimeout(themeTransitionTimeout);
+    themeTransitionTimeout = window.setTimeout(() => {
+      body.classList.remove('theme-transition');
+    }, 400);
+  }
+
+  applyThemeChange();
 }
 
-mobileMenu.addEventListener('click', toggleMobileMenu);
-mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
-
-window.addEventListener('resize', () => {
-  if (window.innerWidth > 768) {
-    mobileNav.classList.remove('active');
-    mobileMenuOverlay.classList.remove('active');
-    body.classList.remove('menu-open');
-    mobileMenu.textContent = '☰';
-  }
-});
+themeToggle.addEventListener('click', toggleTheme);
 
 // Go to Top Button
 const goToTopBtn = document.getElementById('goToTop');
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
+const navLinksContainer = document.querySelector('.nav-links');
+const navIndicator = document.querySelector('.nav-indicator');
+let mobileNavTop = 0;
+let navIndicatorAnimation;
 
-const observerOptions = {
-  threshold: 0.4, // 40% terlihat = dianggap active
-};
+function updateNavIndicator(animate = false) {
+  const activeLink = document.querySelector('.nav-link.active');
+  if (!activeLink) return;
 
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (!entry.isIntersecting) return;
+  if (!animate) navIndicatorAnimation?.cancel();
 
-    const id = entry.target.getAttribute('id');
+  const linkRect = activeLink.getBoundingClientRect();
+  const navRect = navLinksContainer.getBoundingClientRect();
+  const targetX = linkRect.left - navRect.left + navLinksContainer.scrollLeft;
+  const targetWidth = linkRect.width;
 
-    navLinks.forEach((link) => {
-      link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
-    });
+  if (
+    animate &&
+    navIndicator.classList.contains('is-ready') &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    const currentRect = navIndicator.getBoundingClientRect();
+    const currentX =
+      currentRect.left - navRect.left + navLinksContainer.scrollLeft;
+    const currentWidth = currentRect.width;
+    const expandedX = Math.min(currentX, targetX);
+    const expandedWidth =
+      Math.max(currentX + currentWidth, targetX + targetWidth) - expandedX;
+
+    navIndicatorAnimation?.cancel();
+    navIndicatorAnimation = navIndicator.animate(
+      [
+        {
+          transform: `translateX(${currentX}px)`,
+          width: `${currentWidth}px`,
+          offset: 0,
+          easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)',
+        },
+        {
+          transform: `translateX(${expandedX}px)`,
+          width: `${expandedWidth}px`,
+          offset: 0.65,
+          easing: 'cubic-bezier(0.4, 0, 0.8, 0.4)',
+        },
+        {
+          transform: `translateX(${targetX}px)`,
+          width: `${targetWidth}px`,
+          offset: 1,
+        },
+      ],
+      {
+        duration: 700,
+      },
+    );
+  }
+
+  navLinksContainer.style.setProperty('--nav-indicator-x', `${targetX}px`);
+  navLinksContainer.style.setProperty(
+    '--nav-indicator-width',
+    `${targetWidth}px`,
+  );
+}
+
+updateNavIndicator();
+requestAnimationFrame(() => navIndicator.classList.add('is-ready'));
+
+function setActiveNavLink(activeLink, animate = false) {
+  const activeLinkChanged = !activeLink.classList.contains('active');
+
+  navLinks.forEach((link) => {
+    link.classList.toggle('active', link === activeLink);
   });
-}, observerOptions);
 
-sections.forEach((sec) => sectionObserver.observe(sec));
+  if (activeLinkChanged) {
+    updateNavIndicator(animate);
+  }
+}
+
+function updateMobileNavPosition() {
+  const wasSticky = navLinksContainer.classList.contains('is-sticky');
+
+  if (window.innerWidth > 768) {
+    navLinksContainer.classList.remove('is-sticky');
+    if (wasSticky) updateNavIndicator();
+    return;
+  }
+
+  if (!wasSticky) {
+    mobileNavTop =
+      navLinksContainer.getBoundingClientRect().top + window.scrollY;
+  }
+
+  const isSticky = window.scrollY >= mobileNavTop;
+  navLinksContainer.classList.toggle('is-sticky', isSticky);
+  if (isSticky !== wasSticky) updateNavIndicator();
+}
+
+function updateActiveNavLink() {
+  const activationLine = window.innerHeight * 0.35;
+  const currentSection = Array.from(sections).reduce(
+    (activeSection, section) =>
+      section.getBoundingClientRect().top <= activationLine
+        ? section
+        : activeSection,
+    sections[0],
+  );
+  const activeLink = Array.from(navLinks).find(
+    (link) => link.getAttribute('href') === `#${currentSection.id}`,
+  );
+
+  if (activeLink) setActiveNavLink(activeLink, true);
+}
+
+function updateNavigationOnResize() {
+  updateMobileNavPosition();
+  updateActiveNavLink();
+  updateNavIndicator();
+}
+
+window.addEventListener(
+  'scroll',
+  () => {
+    updateMobileNavPosition();
+    updateActiveNavLink();
+  },
+  { passive: true },
+);
+window.addEventListener('resize', updateNavigationOnResize);
+updateNavigationOnResize();
 
 window.addEventListener(
   'scroll',
@@ -347,103 +464,225 @@ goToTopBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// Close mobile menu when clicking on a link
-document.querySelectorAll('.mobile-nav-links a').forEach((link) => {
-  link.addEventListener('click', () => {
-    mobileNav.classList.remove('active');
-    mobileMenuOverlay.classList.remove('active');
-    body.classList.remove('menu-open');
-    mobileMenu.textContent = '☰';
-  });
-});
-
 // Saat diklik manual, langsung aktif juga (biar terasa responsif)
 navLinks.forEach((link) => {
   link.addEventListener('click', () => {
-    navLinks.forEach((l) => l.classList.remove('active'));
-    link.classList.add('active');
+    setActiveNavLink(link, true);
   });
 });
 
 // Tracking functionality
 const form = document.getElementById('trackingForm');
-const modal = document.getElementById('resultModal');
-const closeModal = document.getElementById('closeModal');
-
 const trackButton = document.getElementById('trackButton');
 const trackingNumber = document.getElementById('trackingNumber');
+const trackingNumberError = document.getElementById('trackingNumberError');
+const trackingApiBaseUrl = 'http://localhost:8000/api/public/tracking';
 
-form.addEventListener('submit', (e) => {
+trackingNumber.addEventListener('input', () => {
+  trackingNumber.classList.remove('error');
+  trackingNumber.removeAttribute('aria-invalid');
+  trackingNumberError.textContent = '';
+  trackingNumberError.classList.remove('is-visible');
+});
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const trackingNumber = document.getElementById('trackingNumber').value.trim();
+  const trackingCode = trackingNumber.value.trim();
 
-  if (!trackingNumber) {
-    const input = document.getElementById('trackingNumber');
-    input.classList.add('error');
-    input.placeholder = 'Nomor resi wajib diisi !';
+  if (!/^[a-zA-Z0-9]{7}\d{8}$/.test(trackingCode)) {
+    trackingNumber.classList.add('error');
+    trackingNumber.setAttribute('aria-invalid', 'true');
+    trackingNumberError.textContent = trackingCode
+      ? 'Format tidak valid. Masukkan 7 karakter nomor resi diikuti tanggal DDMMYYYY.'
+      : 'Nomor resi wajib diisi.';
+    trackingNumberError.classList.add('is-visible');
     return;
   }
 
-  // Contoh data timeline statis
-  const timelineData = [
-    {
-      date: '2025-11-01 08:20',
-      status: 'Paket diterima di gudang pusat Jakarta',
-    },
-    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
-    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
-    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
-    { date: '2025-11-01 12:10', status: 'Paket dikirim ke Semarang' },
-    { date: '2025-11-02 07:35', status: 'Paket tiba di gudang Semarang' },
-    { date: '2025-11-02 11:15', status: 'Kurir sedang menuju alamat penerima' },
-    { date: '2025-11-02 14:05', status: 'Paket telah diterima oleh penerima' },
-  ];
+  trackingNumber.removeAttribute('aria-invalid');
+  trackingNumberError.textContent = '';
+  trackingNumberError.classList.remove('is-visible');
+  trackButton.disabled = true;
+  trackButton.textContent = 'Mencari...';
 
-  showModalCekReccu(
-    `Status pengiriman untuk resi <b>${trackingNumber}</b>`,
-    timelineData,
-  );
+  try {
+    const response = await fetch(
+      `${trackingApiBaseUrl}/${encodeURIComponent(trackingCode)}`,
+      {
+        headers: { Accept: 'application/json' },
+        credentials: 'omit',
+      },
+    );
+    const result = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const message =
+        response.status === 404
+          ? 'Resi tidak ditemukan. Periksa nomor resi dan tanggalnya.'
+          : response.status === 422
+            ? 'Format tracking tidak valid. Gunakan 7 karakter resi + tanggal DDMMYYYY.'
+            : response.status === 429
+              ? 'Terlalu banyak permintaan. Coba lagi sebentar.'
+              : 'Tracking sedang tidak dapat dilakukan. Coba lagi nanti.';
+
+      showTrackingModal(trackingCode, null, message);
+      return;
+    }
+
+    showTrackingModal(trackingCode, result?.data, '');
+  } catch (error) {
+    console.error('Gagal menghubungi API tracking:', error);
+    showTrackingModal(
+      trackingCode,
+      null,
+      'Tidak dapat terhubung ke server tracking. Pastikan aplikasi SIMPUL berjalan, lalu coba lagi.',
+    );
+  } finally {
+    trackButton.disabled = false;
+    trackButton.textContent = 'Cek';
+  }
 });
 
-function showModalCekReccu(title, timelineData) {
+function showTrackingModal(trackingCode, data, errorMessage) {
   const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay tracking-modal-overlay';
 
   const wrapper = document.createElement('div');
-  wrapper.className = 'modal-wrapper';
+  wrapper.className = 'modal-wrapper tracking-modal-wrapper';
 
   const modal = document.createElement('div');
-  modal.className = 'modal-content';
+  modal.className = 'modal-content tracking-modal';
 
   const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close';
-  closeBtn.innerHTML = '&times;';
+  closeBtn.className = 'tracking-modal-close';
+  closeBtn.type = 'button';
+  closeBtn.setAttribute('aria-label', 'Tutup hasil tracking');
+  closeBtn.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>';
 
-  // isi timeline
-  const timelineHTML = timelineData?.length
-    ? `<div class="timeline">
-        ${timelineData
-          .map(
-            (item) => `
-          <div class="timeline-item">
-            <p class="timeline-date">${item.date}</p>
-            <p class="timeline-status">${item.status}</p>
-          </div>`,
-          )
-          .join('')}
-      </div>`
-    : `<p>Tidak ada data pengiriman ditemukan.</p>`;
+  const header = document.createElement('div');
+  header.className = 'tracking-modal-header';
+  const heading = document.createElement('div');
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'tracking-modal-eyebrow';
+  eyebrow.textContent = 'Informasi Pengiriman';
+  const title = document.createElement('h3');
+  title.textContent = 'Tracking Resi';
+  const resiNumber = document.createElement('p');
+  resiNumber.className = 'tracking-modal-number';
+  resiNumber.textContent = trackingCode;
+  heading.append(eyebrow, title, resiNumber);
+  header.append(heading, closeBtn);
+  modal.appendChild(header);
 
-  modal.innerHTML = `
-    <div class="modal-header">
-      <h3>${title}</h3>
-    </div>
-    ${timelineHTML}
-  `;
+  if (errorMessage) {
+    const error = document.createElement('div');
+    error.className = 'tracking-error';
+    const errorTitle = document.createElement('strong');
+    errorTitle.textContent = 'Tracking tidak dapat ditemukan';
+    const errorDescription = document.createElement('p');
+    errorDescription.textContent = errorMessage;
+    error.append(errorTitle, errorDescription);
+    modal.appendChild(error);
+  } else if (data) {
+    const route = document.createElement('div');
+    route.className = 'tracking-route';
+    const origin = document.createElement('span');
+    origin.textContent = data.route?.origin ?? '-';
+    const arrow = document.createElement('span');
+    arrow.className = 'tracking-route-arrow';
+    arrow.setAttribute('aria-hidden', 'true');
+    arrow.textContent = '→';
+    const destination = document.createElement('span');
+    destination.textContent = data.route?.destination ?? '-';
+    route.append(origin, arrow, destination);
+    modal.appendChild(route);
 
-  // susun struktur DOM
+    const summary = document.createElement('div');
+    summary.className = 'tracking-summary';
+
+    const status = document.createElement('div');
+    status.className = 'tracking-summary-item';
+    const statusLabel = document.createElement('p');
+    statusLabel.className = 'tracking-summary-label';
+    statusLabel.textContent = 'Status';
+    const statusValue = document.createElement('p');
+    statusValue.className = 'tracking-summary-value tracking-status-value';
+    statusValue.textContent = data.status?.label ?? 'Status tidak tersedia';
+    status.append(statusLabel, statusValue);
+
+    const location = document.createElement('div');
+    location.className = 'tracking-summary-item';
+    const locationLabel = document.createElement('p');
+    locationLabel.className = 'tracking-summary-label';
+    locationLabel.textContent = 'Lokasi Terkini';
+    const locationValue = document.createElement('p');
+    locationValue.className = 'tracking-summary-value';
+    locationValue.textContent = data.route?.current_location ?? '-';
+    location.append(locationLabel, locationValue);
+    summary.append(status, location);
+    modal.appendChild(summary);
+
+    const sectionHeader = document.createElement('div');
+    sectionHeader.className = 'tracking-timeline-header';
+    const sectionTitle = document.createElement('h4');
+    sectionTitle.textContent = 'Riwayat Paket';
+    const eventCount = document.createElement('span');
+    eventCount.className = 'tracking-event-count';
+    const timelineEvents = Array.isArray(data.timeline) ? data.timeline : [];
+    eventCount.textContent = `${timelineEvents.length} catatan`;
+    sectionHeader.append(sectionTitle, eventCount);
+    modal.appendChild(sectionHeader);
+
+    if (timelineEvents.length > 0) {
+      const timeline = document.createElement('div');
+      timeline.className = 'tracking-timeline';
+
+      timelineEvents.forEach((event) => {
+        const item = document.createElement('div');
+        item.className = 'tracking-timeline-item';
+
+        const date = document.createElement('p');
+        date.className = 'tracking-event-date';
+        date.textContent = formatTrackingDate(event.occurred_at);
+
+        const label = document.createElement('p');
+        label.className = 'tracking-event-label';
+        label.textContent = event.label ?? 'Pembaruan perjalanan paket';
+
+        item.append(date, label);
+
+        if (event.from_branch || event.to_branch) {
+          const branchDetails = document.createElement('p');
+          branchDetails.className = 'tracking-event-branches';
+          branchDetails.textContent = [event.from_branch, event.to_branch]
+            .filter(Boolean)
+            .join(' → ');
+          item.appendChild(branchDetails);
+        }
+
+        timeline.appendChild(item);
+      });
+
+      modal.appendChild(timeline);
+    } else {
+      const empty = document.createElement('p');
+      empty.className = 'tracking-empty';
+      empty.textContent = 'Belum ada riwayat pergerakan untuk resi ini.';
+      modal.appendChild(empty);
+    }
+  }
+
+  const footer = document.createElement('div');
+  footer.className = 'tracking-modal-footer';
+  const closeAction = document.createElement('button');
+  closeAction.className = 'tracking-modal-dismiss';
+  closeAction.type = 'button';
+  closeAction.textContent = 'Tutup';
+  footer.appendChild(closeAction);
+  modal.appendChild(footer);
+
   wrapper.appendChild(modal);
-  wrapper.appendChild(closeBtn);
   overlay.appendChild(wrapper);
   document.body.appendChild(overlay);
 
@@ -452,12 +691,32 @@ function showModalCekReccu(title, timelineData) {
   const closeModal = () => {
     overlay.remove();
     document.body.style.overflow = '';
+    document.removeEventListener('keydown', handleEscape);
+  };
+
+  const handleEscape = (event) => {
+    if (event.key === 'Escape') closeModal();
   };
 
   closeBtn.addEventListener('click', closeModal);
+  closeAction.addEventListener('click', closeModal);
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeModal();
   });
+  document.addEventListener('keydown', handleEscape);
+}
+
+function formatTrackingDate(value) {
+  if (!value) return 'Waktu tidak tersedia';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Waktu tidak tersedia';
+
+  return new Intl.DateTimeFormat('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Jakarta',
+  }).format(date);
 }
 
 // Offices functionality
@@ -590,58 +849,60 @@ officeSearch.addEventListener('input', (e) => {
 // Initial render
 renderOffices();
 
-const btnPricelist = document.getElementById('btnPricelist');
+const btnShippingPrice = document.getElementById('btnShippingPrice');
 
-btnPricelist.addEventListener('click', () => {
+btnShippingPrice.addEventListener('click', (event) => {
+  event.preventDefault();
+
   const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay tracking-modal-overlay';
 
   const wrapper = document.createElement('div');
-  wrapper.className = 'modal-wrapper';
+  wrapper.className = 'modal-wrapper tracking-modal-wrapper';
 
   const modal = document.createElement('div');
-  modal.className = 'modal-content';
-
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close';
-  closeBtn.innerHTML = '&times;';
-
-  const formHtml = `
-      <form class="form-group form-pricelist"> 
-        <input type="text" name="kota_asal" id="kota_asal" class="form-input" placeholder="Kota asal" />
-        <input type="text" name="kota_tujuan" id="kota_tujuan" class="form-input" placeholder="Kota tujuan" />
-        <button class="btn btn-primary">Cek</button>
-      </form>
-  `;
-
+  modal.className = 'modal-content tracking-modal pricelist-modal';
   modal.innerHTML = `
-    <div class="modal-header">
-      <h3>Cek Pricelist</h3>
+    <div class="tracking-modal-header">
+      <div>
+        <p class="tracking-modal-eyebrow">Informasi Pengiriman</p>
+        <h3>Cek Pricelist</h3>
+        <p class="tracking-modal-number">Informasi tarif pengiriman</p>
+      </div>
+      <button type="button" class="tracking-modal-close" aria-label="Tutup pricelist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+      </button>
     </div>
-    ${formHtml}
+    <p class="pricelist-message">
+      Pengecekan ongkir otomatis belum tersedia. Hubungi tim kami untuk mendapatkan informasi tarif.
+    </p>
+    <div class="tracking-modal-footer">
+      <button type="button" class="tracking-modal-dismiss" data-close-pricelist>Tutup</button>
+      <a class="btn btn-primary" href="#contact">Hubungi Kami</a>
+    </div>
   `;
 
-  // susun struktur DOM
   wrapper.appendChild(modal);
-  wrapper.appendChild(closeBtn);
   overlay.appendChild(wrapper);
   document.body.appendChild(overlay);
-
-  requestAnimationFrame(() => {
-    document.querySelector('#kota_asal')?.focus();
-  });
-
   document.body.style.overflow = 'hidden';
 
   const closeModal = () => {
     overlay.remove();
     document.body.style.overflow = '';
+    document.removeEventListener('keydown', handleEscape);
+  };
+  const handleEscape = (keyEvent) => {
+    if (keyEvent.key === 'Escape') closeModal();
   };
 
-  closeBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
+  modal.querySelector('.tracking-modal-close').addEventListener('click', closeModal);
+  modal.querySelector('[data-close-pricelist]').addEventListener('click', closeModal);
+  modal.querySelector('a[href="#contact"]').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (clickEvent) => {
+    if (clickEvent.target === overlay) closeModal();
   });
+  document.addEventListener('keydown', handleEscape);
 });
 
 // Loader Functionality
@@ -655,7 +916,6 @@ window.addEventListener('load', () => {
     // Remove from DOM after transition
     setTimeout(() => {
       loader.style.display = 'none';
-      document.body.classList.remove('menu-open'); // Ensure scroll is enabled
     }, 500);
   }, 800); // Minimal load time of 800ms
 });
