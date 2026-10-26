@@ -563,15 +563,12 @@ function showTrackingModal(trackingCode, data, errorMessage) {
   const header = document.createElement('div');
   header.className = 'tracking-modal-header';
   const heading = document.createElement('div');
-  const eyebrow = document.createElement('p');
-  eyebrow.className = 'tracking-modal-eyebrow';
-  eyebrow.textContent = 'Informasi Pengiriman';
   const title = document.createElement('h3');
   title.textContent = 'Tracking Resi';
   const resiNumber = document.createElement('p');
   resiNumber.className = 'tracking-modal-number';
   resiNumber.textContent = trackingCode;
-  heading.append(eyebrow, title, resiNumber);
+  heading.append(title, resiNumber);
   header.append(heading, closeBtn);
   modal.appendChild(header);
 
@@ -585,42 +582,32 @@ function showTrackingModal(trackingCode, data, errorMessage) {
     error.append(errorTitle, errorDescription);
     modal.appendChild(error);
   } else if (data) {
-    const route = document.createElement('div');
-    route.className = 'tracking-route';
-    const origin = document.createElement('span');
-    origin.textContent = data.route?.origin ?? '-';
-    const arrow = document.createElement('span');
-    arrow.className = 'tracking-route-arrow';
-    arrow.setAttribute('aria-hidden', 'true');
-    arrow.textContent = '→';
-    const destination = document.createElement('span');
-    destination.textContent = data.route?.destination ?? '-';
-    route.append(origin, arrow, destination);
-    modal.appendChild(route);
-
     const summary = document.createElement('div');
     summary.className = 'tracking-summary';
 
-    const status = document.createElement('div');
-    status.className = 'tracking-summary-item';
-    const statusLabel = document.createElement('p');
-    statusLabel.className = 'tracking-summary-label';
-    statusLabel.textContent = 'Status';
-    const statusValue = document.createElement('p');
-    statusValue.className = 'tracking-summary-value tracking-status-value';
-    statusValue.textContent = data.status?.label ?? 'Status tidak tersedia';
-    status.append(statusLabel, statusValue);
+    const createSummaryItem = (label, value, valueClass = '') => {
+      const item = document.createElement('div');
+      item.className = 'tracking-summary-item';
+      const itemLabel = document.createElement('p');
+      itemLabel.className = 'tracking-summary-label';
+      itemLabel.textContent = label;
+      const itemValue = document.createElement('p');
+      itemValue.className = `tracking-summary-value ${valueClass}`.trim();
+      itemValue.textContent = value ?? '-';
+      item.append(itemLabel, itemValue);
+      return item;
+    };
 
-    const location = document.createElement('div');
-    location.className = 'tracking-summary-item';
-    const locationLabel = document.createElement('p');
-    locationLabel.className = 'tracking-summary-label';
-    locationLabel.textContent = 'Lokasi Terkini';
-    const locationValue = document.createElement('p');
-    locationValue.className = 'tracking-summary-value';
-    locationValue.textContent = data.route?.current_location ?? '-';
-    location.append(locationLabel, locationValue);
-    summary.append(status, location);
+    summary.append(
+      createSummaryItem('Pengirim', data.sender_name),
+      createSummaryItem('Penerima', data.recipient_name),
+      createSummaryItem(
+        'Status',
+        data.status?.label ?? 'Status tidak tersedia',
+        'tracking-status-value',
+      ),
+      createSummaryItem('Lokasi Terkini', data.route?.current_location),
+    );
     modal.appendChild(summary);
 
     const sectionHeader = document.createElement('div');
@@ -637,10 +624,21 @@ function showTrackingModal(trackingCode, data, errorMessage) {
     if (timelineEvents.length > 0) {
       const timeline = document.createElement('div');
       timeline.className = 'tracking-timeline';
+      const sortedTimelineEvents = [...timelineEvents].sort((a, b) => {
+        const timeA = Date.parse(a.occurred_at ?? '');
+        const timeB = Date.parse(b.occurred_at ?? '');
+        return (Number.isNaN(timeB) ? -Infinity : timeB) -
+          (Number.isNaN(timeA) ? -Infinity : timeA);
+      });
 
-      timelineEvents.forEach((event) => {
+      sortedTimelineEvents.forEach((event, index) => {
         const item = document.createElement('div');
-        item.className = 'tracking-timeline-item';
+        item.className = `tracking-timeline-item ${
+          index === 0 ? 'is-latest' : 'is-previous'
+        }`;
+
+        const eventHeader = document.createElement('div');
+        eventHeader.className = 'tracking-event-header';
 
         const date = document.createElement('p');
         date.className = 'tracking-event-date';
@@ -650,16 +648,12 @@ function showTrackingModal(trackingCode, data, errorMessage) {
         label.className = 'tracking-event-label';
         label.textContent = event.label ?? 'Pembaruan perjalanan paket';
 
-        item.append(date, label);
+        const description = document.createElement('p');
+        description.className = 'tracking-event-branches';
+        description.textContent = getTrackingEventDescription(event);
 
-        if (event.from_branch || event.to_branch) {
-          const branchDetails = document.createElement('p');
-          branchDetails.className = 'tracking-event-branches';
-          branchDetails.textContent = [event.from_branch, event.to_branch]
-            .filter(Boolean)
-            .join(' → ');
-          item.appendChild(branchDetails);
-        }
+        eventHeader.append(label, date);
+        item.append(eventHeader, description);
 
         timeline.appendChild(item);
       });
@@ -717,6 +711,31 @@ function formatTrackingDate(value) {
     timeStyle: 'short',
     timeZone: 'Asia/Jakarta',
   }).format(date);
+}
+
+function getTrackingEventDescription(event) {
+  const descriptions = {
+    LOADED: 'Paket telah dimuat dan menunggu keberangkatan.',
+    DEPARTED: 'Paket sedang menuju cabang berikutnya.',
+    ARRIVED: 'Armada telah tiba di cabang.',
+    UNLOADED: 'Paket telah diturunkan untuk proses selanjutnya.',
+    PICKED_UP: 'Paket telah dijemput dan sedang dibawa menuju cabang.',
+    TRANSIT: 'Paket sedang diteruskan ke cabang berikutnya.',
+    OUT_FOR_DELIVERY: 'Paket sedang diantar ke penerima.',
+    DELIVERED: 'Paket telah sampai kepada penerima.',
+    DELIVERY_FAILED: 'Pengantaran belum berhasil dan akan ditindaklanjuti.',
+  };
+
+  if (event.event === 'RECEIVED') {
+    const branch = event.from_branch ?? event.to_branch;
+    return branch
+      ? `Paket diterima di ${branch}`
+      : 'Paket telah dicatat dan siap diproses.';
+  }
+
+  return (
+    descriptions[event.event] ?? 'Pembaruan perjalanan paket telah dicatat.'
+  );
 }
 
 // Offices functionality

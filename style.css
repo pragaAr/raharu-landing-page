@@ -784,27 +784,6 @@ body:not(.dark-theme) .hero .tracking-form {
   stroke-width: 2;
 }
 
-.tracking-route {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #0f1c3d;
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.tracking-route-arrow {
-  color: #7b92c6;
-}
-
-.tracking-route span:last-child {
-  color: #a6b6d9;
-}
-
 .tracking-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -858,7 +837,7 @@ body:not(.dark-theme) .hero .tracking-form {
 .tracking-timeline {
   position: relative;
   display: grid;
-  gap: 12px;
+  gap: 16px;
   padding-left: 28px;
 }
 
@@ -866,7 +845,7 @@ body:not(.dark-theme) .hero .tracking-form {
   position: absolute;
   top: 12px;
   bottom: 12px;
-  left: 6px;
+  left: 7px;
   width: 1px;
   background: var(--border);
   content: '';
@@ -876,37 +855,54 @@ body:not(.dark-theme) .hero .tracking-form {
   position: relative;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--accent-2);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--secondary) 92%, var(--text) 8%);
+}
+
+.tracking-timeline-item.is-previous {
+  background: color-mix(in srgb, var(--primary) 38%, var(--secondary));
 }
 
 .tracking-timeline-item::before {
   position: absolute;
   top: 16px;
   left: -27px;
-  width: 11px;
-  height: 11px;
-  border: 3px solid var(--secondary);
+  z-index: 1;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--blue-500);
+  background: #0ea5e9;
+  box-shadow: 0 0 0 4px var(--secondary);
   content: '';
 }
 
-.tracking-timeline-item:last-child::before {
-  background: var(--accent);
+.tracking-timeline-item.is-previous::before {
+  background: var(--text-muted);
+}
+
+.tracking-event-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
 }
 
 .tracking-event-date {
-  margin-bottom: 5px;
   color: var(--text-muted);
-  font-size: 0.68rem;
-  font-weight: 600;
+  font-size: 0.64rem;
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 .tracking-event-label {
   color: var(--text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.tracking-timeline-item.is-previous .tracking-event-label {
+  color: var(--text-muted);
 }
 
 .tracking-event-branches {
@@ -983,11 +979,6 @@ body:not(.dark-theme) .hero .tracking-form {
 @media (max-width: 520px) {
   .tracking-modal {
     padding: 18px;
-  }
-
-  .tracking-route {
-    align-items: flex-start;
-    font-size: 0.8rem;
   }
 
   .tracking-summary {
