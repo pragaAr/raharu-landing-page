@@ -526,9 +526,9 @@ form.addEventListener('submit', async (e) => {
     if (!response.ok) {
       const message =
         response.status === 404
-          ? 'Resi tidak ditemukan. Periksa nomor resi dan tanggalnya.'
+          ? 'Data tidak ditemukan. Periksa nomor resi dan tanggalnya.'
           : response.status === 422
-            ? 'Format tracking tidak valid. Gunakan 7 karakter resi + tanggal DDMMYYYY.'
+            ? 'Format nomor resi tidak valid. Gunakan nomor resi + tanggal DDMMYYYY.'
             : response.status === 429
               ? 'Terlalu banyak permintaan. Coba lagi sebentar.'
               : 'Tracking sedang tidak dapat dilakukan. Coba lagi nanti.';
@@ -543,7 +543,7 @@ form.addEventListener('submit', async (e) => {
     showTrackingModal(
       trackingCode,
       null,
-      'Tidak dapat terhubung ke server tracking. Pastikan backend berjalan, lalu coba lagi.',
+      'Tidak dapat terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.',
     );
   } finally {
     trackButton.disabled = false;
@@ -584,7 +584,7 @@ function showTrackingModal(trackingCode, data, errorMessage) {
     const error = document.createElement('div');
     error.className = 'tracking-error';
     const errorTitle = document.createElement('strong');
-    errorTitle.textContent = 'Tracking tidak dapat ditemukan';
+    errorTitle.textContent = 'Data tidak ditemukan';
     const errorDescription = document.createElement('p');
     errorDescription.textContent = errorMessage;
     error.append(errorTitle, errorDescription);
