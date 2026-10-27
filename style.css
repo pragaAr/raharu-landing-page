@@ -739,6 +739,17 @@ body:not(.dark-theme) .hero .tracking-form {
   height: min(88vh, 760px);
 }
 
+.tracking-modal:not(.pricelist-modal) > .tracking-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--secondary);
+}
+
+.dark-theme .tracking-modal:not(.pricelist-modal) > .tracking-modal-header {
+  background: linear-gradient(90deg, #060e20 0%, #0c162b 50%, #081834 100%);
+}
+
 .tracking-modal-header {
   display: flex;
   align-items: flex-start;
