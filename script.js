@@ -330,17 +330,15 @@ const navLinksContainer = document.querySelector('.nav-links');
 const navIndicator = document.querySelector('.nav-indicator');
 let mobileNavTop = 0;
 let navIndicatorAnimation;
+let navigationUpdateScheduled = false;
 
-function updateNavIndicator(animate = false) {
-  const activeLink = document.querySelector('.nav-link.active');
-  if (!activeLink) return;
-
-  if (!animate) navIndicatorAnimation?.cancel();
-
+function measureNavIndicator(activeLink, animate) {
   const linkRect = activeLink.getBoundingClientRect();
   const navRect = navLinksContainer.getBoundingClientRect();
-  const targetX = linkRect.left - navRect.left + navLinksContainer.scrollLeft;
-  const targetWidth = linkRect.width;
+  const measurements = {
+    targetX: linkRect.left - navRect.left + navLinksContainer.scrollLeft,
+    targetWidth: linkRect.width,
+  };
 
   if (
     animate &&
@@ -348,9 +346,28 @@ function updateNavIndicator(animate = false) {
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches
   ) {
     const currentRect = navIndicator.getBoundingClientRect();
-    const currentX =
+    measurements.currentX =
       currentRect.left - navRect.left + navLinksContainer.scrollLeft;
-    const currentWidth = currentRect.width;
+    measurements.currentWidth = currentRect.width;
+  }
+
+  return measurements;
+}
+
+function updateNavIndicator(animate = false, measurements = null) {
+  const activeLink = document.querySelector('.nav-link.active');
+  if (!activeLink) return;
+
+  const indicatorMeasurements =
+    measurements ?? measureNavIndicator(activeLink, animate);
+  const {
+    targetX,
+    targetWidth,
+    currentX,
+    currentWidth,
+  } = indicatorMeasurements;
+
+  if (typeof currentX === 'number' && typeof currentWidth === 'number') {
     const expandedX = Math.min(currentX, targetX);
     const expandedWidth =
       Math.max(currentX + currentWidth, targetX + targetWidth) - expandedX;
@@ -380,6 +397,8 @@ function updateNavIndicator(animate = false) {
         duration: 700,
       },
     );
+  } else {
+    navIndicatorAnimation?.cancel();
   }
 
   navLinksContainer.style.setProperty('--nav-indicator-x', `${targetX}px`);
@@ -394,36 +413,20 @@ requestAnimationFrame(() => navIndicator.classList.add('is-ready'));
 
 function setActiveNavLink(activeLink, animate = false) {
   const activeLinkChanged = !activeLink.classList.contains('active');
+  const indicatorMeasurements = activeLinkChanged
+    ? measureNavIndicator(activeLink, animate)
+    : null;
 
   navLinks.forEach((link) => {
     link.classList.toggle('active', link === activeLink);
   });
 
   if (activeLinkChanged) {
-    updateNavIndicator(animate);
+    updateNavIndicator(animate, indicatorMeasurements);
   }
 }
 
-function updateMobileNavPosition() {
-  const wasSticky = navLinksContainer.classList.contains('is-sticky');
-
-  if (window.innerWidth > 768) {
-    navLinksContainer.classList.remove('is-sticky');
-    if (wasSticky) updateNavIndicator();
-    return;
-  }
-
-  if (!wasSticky) {
-    mobileNavTop =
-      navLinksContainer.getBoundingClientRect().top + window.scrollY;
-  }
-
-  const isSticky = window.scrollY >= mobileNavTop;
-  navLinksContainer.classList.toggle('is-sticky', isSticky);
-  if (isSticky !== wasSticky) updateNavIndicator();
-}
-
-function updateActiveNavLink() {
+function getActiveNavLink() {
   const activationLine = window.innerHeight * 0.35;
   const currentSection = Array.from(sections).reduce(
     (activeSection, section) =>
@@ -436,37 +439,70 @@ function updateActiveNavLink() {
     (link) => link.getAttribute('href') === `#${currentSection.id}`,
   );
 
-  if (activeLink) setActiveNavLink(activeLink, true);
+  return activeLink;
+}
+
+function updateNavigationOnScroll() {
+  navigationUpdateScheduled = false;
+
+  const scrollY = window.scrollY;
+  const shouldBeSticky =
+    window.innerWidth <= 768 && scrollY >= mobileNavTop;
+  const isSticky = navLinksContainer.classList.contains('is-sticky');
+  const activeLink = getActiveNavLink();
+  const activeLinkChanged =
+    activeLink && !activeLink.classList.contains('active');
+  const stickyStateChanged = shouldBeSticky !== isSticky;
+  const indicatorMeasurements =
+    activeLink && (activeLinkChanged || stickyStateChanged)
+      ? measureNavIndicator(activeLink, activeLinkChanged)
+      : null;
+
+  navLinksContainer.classList.toggle('is-sticky', shouldBeSticky);
+
+  if (activeLinkChanged) {
+    navLinks.forEach((link) => {
+      link.classList.toggle('active', link === activeLink);
+    });
+  }
+
+  if (indicatorMeasurements) {
+    updateNavIndicator(activeLinkChanged, indicatorMeasurements);
+  }
+
+  goToTopBtn.classList.toggle('active', scrollY > 300);
+}
+
+function scheduleNavigationUpdate() {
+  if (navigationUpdateScheduled) return;
+
+  navigationUpdateScheduled = true;
+  requestAnimationFrame(updateNavigationOnScroll);
 }
 
 function updateNavigationOnResize() {
-  updateMobileNavPosition();
-  updateActiveNavLink();
-  updateNavIndicator();
+  const wasSticky = navLinksContainer.classList.contains('is-sticky');
+
+  if (window.innerWidth > 768 || wasSticky) {
+    navLinksContainer.classList.remove('is-sticky');
+    requestAnimationFrame(() => {
+      mobileNavTop =
+        window.innerWidth <= 768
+          ? navLinksContainer.getBoundingClientRect().top + window.scrollY
+          : 0;
+      scheduleNavigationUpdate();
+    });
+    return;
+  }
+
+  mobileNavTop =
+    navLinksContainer.getBoundingClientRect().top + window.scrollY;
+  scheduleNavigationUpdate();
 }
 
-window.addEventListener(
-  'scroll',
-  () => {
-    updateMobileNavPosition();
-    updateActiveNavLink();
-  },
-  { passive: true },
-);
+window.addEventListener('scroll', scheduleNavigationUpdate, { passive: true });
 window.addEventListener('resize', updateNavigationOnResize);
 updateNavigationOnResize();
-
-window.addEventListener(
-  'scroll',
-  () => {
-    if (window.pageYOffset > 300) {
-      goToTopBtn.classList.add('active');
-    } else {
-      goToTopBtn.classList.remove('active');
-    }
-  },
-  { passive: true },
-);
 
 goToTopBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -811,10 +847,11 @@ function renderPagination() {
     pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
     pageBtn.textContent = i;
     pageBtn.addEventListener('click', () => {
+      const officesTop = officesGrid.offsetTop;
       currentPage = i;
       renderOffices();
       window.scrollTo({
-        top: officesGrid.offsetTop - 100,
+        top: officesTop - 100,
         behavior: 'smooth',
       });
     });
