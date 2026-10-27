@@ -749,6 +749,7 @@ function getTrackingEventDescription(event) {
 // Offices functionality
 const officesGrid = document.getElementById('officesGrid');
 const officeSearch = document.getElementById('officeSearch');
+const clearOfficeSearch = document.getElementById('clearOfficeSearch');
 const regionFilters = document.querySelectorAll('.region-filter');
 const pagination = document.getElementById('pagination');
 
@@ -760,6 +761,7 @@ let currentRegion = 'all';
 // Render offices
 function renderOffices() {
   officesGrid.innerHTML = '';
+  renderPagination();
 
   const startIndex = (currentPage - 1) * officesPerPage;
   const endIndex = startIndex + officesPerPage;
@@ -795,8 +797,6 @@ function renderOffices() {
                 `;
     officesGrid.appendChild(officeCard);
   });
-
-  renderPagination();
 }
 
 // Render pagination
@@ -826,35 +826,29 @@ function renderPagination() {
 function filterOfficesByRegion(region) {
   currentRegion = region;
   currentPage = 1;
-
-  if (region === 'all') {
-    filteredOffices = [...officesData];
-  } else {
-    filteredOffices = officesData.filter((office) => office.region === region);
-  }
-
-  renderOffices();
+  regionFilters.forEach((filter) => {
+    const isActive = filter.dataset.region === region;
+    filter.classList.toggle('active', isActive);
+    filter.setAttribute('aria-pressed', String(isActive));
+  });
+  searchOffices();
 }
 
 // Search offices
-function searchOffices(query) {
+function searchOffices() {
   currentPage = 1;
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = officeSearch.value.trim().toLowerCase();
 
-  if (currentRegion === 'all') {
-    filteredOffices = officesData.filter(
-      (office) =>
-        office.city.toLowerCase().includes(lowerQuery) ||
-        office.address.toLowerCase().includes(lowerQuery),
-    );
-  } else {
-    filteredOffices = officesData.filter(
-      (office) =>
-        office.region === currentRegion &&
-        (office.city.toLowerCase().includes(lowerQuery) ||
-          office.address.toLowerCase().includes(lowerQuery)),
-    );
-  }
+  filteredOffices = officesData.filter((office) => {
+    const matchesRegion =
+      currentRegion === 'all' || office.region === currentRegion;
+    const matchesQuery =
+      !lowerQuery ||
+      office.city.toLowerCase().includes(lowerQuery) ||
+      office.address.toLowerCase().includes(lowerQuery);
+
+    return matchesRegion && matchesQuery;
+  });
 
   renderOffices();
 }
@@ -862,15 +856,22 @@ function searchOffices(query) {
 // Event listeners for region filters
 regionFilters.forEach((filter) => {
   filter.addEventListener('click', () => {
-    regionFilters.forEach((f) => f.classList.remove('active'));
-    filter.classList.add('active');
     filterOfficesByRegion(filter.dataset.region);
   });
 });
 
 // Event listener for search
 officeSearch.addEventListener('input', (e) => {
-  searchOffices(e.target.value);
+  const query = e.target.value;
+  clearOfficeSearch.hidden = query.length === 0;
+  searchOffices();
+});
+
+clearOfficeSearch.addEventListener('click', () => {
+  officeSearch.value = '';
+  clearOfficeSearch.hidden = true;
+  searchOffices();
+  officeSearch.focus();
 });
 
 // Initial render

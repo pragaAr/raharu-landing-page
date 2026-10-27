@@ -123,7 +123,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-.dark-theme body {
+body.dark-theme {
   background-image:
     radial-gradient(
       800px 420px at 15% -10%,
@@ -1244,6 +1244,134 @@ body:not(.dark-theme) .hero .tracking-form {
 .service-card p {
   color: var(--text-muted);
 }
+
+/* About Section */
+.about {
+  padding: 60px 0;
+  background: var(--primary);
+}
+
+.about-content {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  align-items: center;
+  gap: clamp(32px, 6vw, 80px);
+  width: 100%;
+  padding: clamp(28px, 5vw, 64px);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+  box-shadow: var(--shadow-sm);
+  animation: about-card-enter 700ms 100ms ease-out both;
+}
+
+.about-content::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--blue-400));
+  content: '';
+}
+
+.about-eyebrow {
+  margin-bottom: 12px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.about-content h2 {
+  max-width: 480px;
+  margin-bottom: 18px;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.about-description {
+  max-width: 520px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.about-highlights {
+  display: grid;
+  gap: 12px;
+}
+
+.about-highlight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 62%, transparent);
+  transition:
+    transform var(--ease-out),
+    border-color var(--ease-out),
+    box-shadow var(--ease-out);
+}
+
+.about-highlight:hover {
+  transform: translateX(4px);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  box-shadow: var(--shadow-sm);
+}
+
+.about-highlight-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 9%, var(--secondary));
+  color: var(--accent);
+}
+
+.about-highlight-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.about-highlight > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.about-highlight strong {
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.about-highlight > span:last-child > span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+@keyframes about-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Offices Section */
 .offices {
   padding: 100px 0;
@@ -1303,13 +1431,14 @@ body:not(.dark-theme) .hero .tracking-form {
 }
 
 .search-box {
+  position: relative;
   max-width: 90vw;
   margin: 0 auto 25px;
 }
 
 .search-input {
   width: 100%;
-  padding: 15px 20px;
+  padding: 15px 48px 15px 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   font-size: 0.9rem;
@@ -1329,6 +1458,46 @@ body:not(.dark-theme) .hero .tracking-form {
 .dark-theme .search-input:focus {
   border-color: var(--blue-300);
   box-shadow: 0 0 0 3px rgba(81, 110, 179, 0.25);
+}
+
+.search-clear-button {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.search-clear-button:hover {
+  background: var(--accent-1);
+  color: var(--text);
+}
+
+.search-clear-button:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.search-clear-button[hidden] {
+  display: none;
+}
+
+.search-clear-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
 }
 
 .offices-grid {
@@ -1588,6 +1757,8 @@ footer {
   right: 30px;
   width: 40px;
   height: 40px;
+  padding: 0;
+  border: 1px solid transparent;
   background: var(--accent);
   color: #fff;
   border-radius: 50%;
@@ -1595,10 +1766,20 @@ footer {
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  font: inherit;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s;
   z-index: 999;
+}
+
+.dark-theme .go-to-top {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.go-to-top:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
 }
 
 .go-to-top.active {
@@ -1615,6 +1796,11 @@ footer {
 @media (max-width: 992px) {
   .hero-text h1 {
     font-size: 2.5rem;
+  }
+
+  .about-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
   }
 
   .offices-grid {
@@ -1688,6 +1874,20 @@ footer {
 
   .hero-scroll-cue {
     bottom: 14px;
+  }
+
+  .about {
+    padding: 40px 0;
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 30px 24px;
+  }
+
+  .about-content h2 {
+    max-width: 560px;
   }
 
   .hero .hero-tool-card h2 {
@@ -1976,6 +2176,8 @@ body.theme-transition button {
   .hero-tool-card,
   .hero-delivery-flow,
   .hero-scroll-cue svg,
+  .about-content,
+  .about-highlight,
   .nav-links .nav-indicator.is-ready {
     animation: none;
     transition: none;

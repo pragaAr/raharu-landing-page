@@ -35,6 +35,7 @@
           <ul class="nav-links">
             <li><a href="#home" class="nav-link active">Beranda</a></li>
             <li><a href="#services" class="nav-link">Layanan</a></li>
+            <li><a href="#about" class="nav-link">Tentang</a></li>
             <li><a href="#offices" class="nav-link">Kantor</a></li>
             <li>
               <a href="#cta" class="nav-link">Penawaran</a>
@@ -257,6 +258,62 @@
       </div>
     </section>
 
+    <!-- About Section -->
+    <section class="about" id="about">
+      <div class="container">
+        <div class="about-content">
+          <div class="about-intro">
+            <p class="about-eyebrow">MENGENAL RAHARU</p>
+            <h2>Setiap kiriman, lebih mudah sampai tujuan.</h2>
+            <p class="about-description">
+              Raharu membantu pengiriman Anda berjalan lebih praktis dan
+              terpercaya. Pilih layanan yang sesuai, pantau perjalanan paket,
+              dan temukan dukungan kantor cabang di berbagai kota di Indonesia.
+            </p>
+          </div>
+          <div class="about-highlights" aria-label="Keunggulan Raharu">
+            <div class="about-highlight">
+              <span class="about-highlight-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" />
+                  <circle cx="7" cy="18" r="2" />
+                  <circle cx="18" cy="18" r="2" />
+                </svg>
+              </span>
+              <span>
+                <strong>Pilihan layanan fleksibel</strong>
+                <span>Reguler, express, penjemputan, dan prioritas.</span>
+              </span>
+            </div>
+            <div class="about-highlight">
+              <span class="about-highlight-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="8" />
+                  <path d="M12 8v4l3 2" />
+                </svg>
+              </span>
+              <span>
+                <strong>Perjalanan mudah dipantau</strong>
+                <span>Cek perkembangan paket melalui fitur tracking.</span>
+              </span>
+            </div>
+            <div class="about-highlight">
+              <span class="about-highlight-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
+                  <circle cx="12" cy="9" r="2.5" />
+                </svg>
+              </span>
+              <span>
+                <strong>Dukungan di berbagai kota</strong>
+                <span>Jaringan kantor cabang siap membantu kebutuhan Anda.</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Offices Section -->
     <section class="offices" id="offices">
       <div class="container">
@@ -272,25 +329,65 @@
         </div>
 
         <div class="search-box">
+          <label class="visually-hidden" for="officeSearch">
+            Cari kantor berdasarkan kota atau alamat
+          </label>
           <input
             type="text"
             class="search-input"
             placeholder="Cari kota atau alamat..."
             id="officeSearch"
           />
+          <button
+            type="button"
+            class="search-clear-button"
+            id="clearOfficeSearch"
+            aria-label="Hapus pencarian"
+            hidden
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
         </div>
 
         <div class="offices-controls">
-          <button class="region-filter active" data-region="all">
+          <button
+            class="region-filter active"
+            data-region="all"
+            aria-pressed="true"
+          >
             Semua Wilayah
           </button>
-          <button class="region-filter" data-region="jawa">Pulau Jawa</button>
-          <button class="region-filter" data-region="sumatera">Sumatera</button>
-          <button class="region-filter" data-region="kalimantan">
+          <button class="region-filter" data-region="jawa" aria-pressed="false">
+            Pulau Jawa
+          </button>
+          <button
+            class="region-filter"
+            data-region="sumatera"
+            aria-pressed="false"
+          >
+            Sumatera
+          </button>
+          <button
+            class="region-filter"
+            data-region="kalimantan"
+            aria-pressed="false"
+          >
             Kalimantan
           </button>
-          <button class="region-filter" data-region="sulawesi">Sulawesi</button>
-          <button class="region-filter" data-region="indonesia-timur">
+          <button
+            class="region-filter"
+            data-region="sulawesi"
+            aria-pressed="false"
+          >
+            Sulawesi
+          </button>
+          <button
+            class="region-filter"
+            data-region="indonesia-timur"
+            aria-pressed="false"
+          >
             Indonesia Timur
           </button>
         </div>
@@ -367,7 +464,14 @@
     </footer>
 
     <!-- Go to Top Button -->
-    <div class="go-to-top" id="goToTop">↑</div>
+    <button
+      class="go-to-top"
+      id="goToTop"
+      type="button"
+      aria-label="Kembali ke atas"
+    >
+      ↑
+    </button>
 
     <script src="script.js"></script>
   </body>
