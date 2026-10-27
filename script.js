@@ -248,8 +248,18 @@ const body = document.body;
 const logo = document.querySelectorAll('.logo-img');
 let themeTransitionTimeout;
 
-// Check for saved theme preference or default to light
-const currentTheme = localStorage.getItem('theme') || 'light';
+// Use the saved preference, or follow the device preference when none exists.
+let currentTheme;
+try {
+  currentTheme = localStorage.getItem('theme');
+} catch (error) {
+  console.warn('Preferensi tema tidak dapat dibaca:', error);
+}
+if (currentTheme !== 'dark' && currentTheme !== 'light') {
+  currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
 if (currentTheme === 'dark') {
   body.classList.add('dark-theme');
   logo.forEach((img) => {
@@ -264,7 +274,11 @@ if (currentTheme === 'dark') {
 function applyThemeChange() {
   body.classList.toggle('dark-theme');
   const isDark = body.classList.contains('dark-theme');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  try {
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  } catch (error) {
+    console.warn('Preferensi tema tidak dapat disimpan:', error);
+  }
   logo.forEach((img) => {
     img.src = isDark ? 'img/raharu-dark.png' : 'img/raharu-light.png';
   });
@@ -277,17 +291,14 @@ function toggleTheme(event) {
 
   if (
     !prefersReducedMotion &&
+    window.matchMedia('(min-width: 769px)').matches &&
     typeof document.startViewTransition === 'function'
   ) {
     const buttonRect = themeToggle.getBoundingClientRect();
     const originX =
-      event.detail === 0
-        ? buttonRect.left + buttonRect.width / 2
-        : event.clientX;
+      event.detail === 0 ? buttonRect.left + buttonRect.width / 2 : event.clientX;
     const originY =
-      event.detail === 0
-        ? buttonRect.top + buttonRect.height / 2
-        : event.clientY;
+      event.detail === 0 ? buttonRect.top + buttonRect.height / 2 : event.clientY;
 
     document.documentElement.style.setProperty(
       '--theme-reveal-x',
@@ -301,14 +312,11 @@ function toggleTheme(event) {
     return;
   }
 
-  if (!prefersReducedMotion) {
-    body.classList.add('theme-transition');
-    window.clearTimeout(themeTransitionTimeout);
-    themeTransitionTimeout = window.setTimeout(() => {
-      body.classList.remove('theme-transition');
-    }, 400);
-  }
-
+  body.classList.add('theme-transition');
+  window.clearTimeout(themeTransitionTimeout);
+  themeTransitionTimeout = window.setTimeout(() => {
+    body.classList.remove('theme-transition');
+  }, prefersReducedMotion ? 0 : 220);
   applyThemeChange();
 }
 
@@ -539,7 +547,7 @@ form.addEventListener('submit', async (e) => {
     );
   } finally {
     trackButton.disabled = false;
-    trackButton.textContent = 'Cek';
+    trackButton.textContent = 'Lacak';
   }
 });
 
