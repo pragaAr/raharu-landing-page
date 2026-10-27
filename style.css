@@ -735,10 +735,6 @@ body:not(.dark-theme) .hero .tracking-form {
   border-radius: 16px;
 }
 
-.tracking-modal:not(.pricelist-modal) {
-  height: min(88vh, 760px);
-}
-
 .tracking-modal:not(.pricelist-modal) > .tracking-modal-header {
   position: sticky;
   top: 0;
