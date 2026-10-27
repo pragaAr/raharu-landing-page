@@ -735,6 +735,10 @@ body:not(.dark-theme) .hero .tracking-form {
   border-radius: 16px;
 }
 
+.tracking-modal:not(.pricelist-modal) {
+  height: min(88vh, 760px);
+}
+
 .tracking-modal-header {
   display: flex;
   align-items: flex-start;
@@ -882,10 +886,10 @@ body:not(.dark-theme) .hero .tracking-form {
 .tracking-timeline-item::before {
   position: absolute;
   top: 16px;
-  left: -27px;
+  left: -26px;
   z-index: 1;
-  width: 120px;
-  height: 120px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #0ea5e9;
   box-shadow: 0 0 0 4px var(--secondary);
