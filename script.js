@@ -411,19 +411,25 @@ function updateNavIndicator(animate = false, measurements = null) {
 updateNavIndicator();
 requestAnimationFrame(() => navIndicator.classList.add('is-ready'));
 
+function scrollActiveNavLinkIntoView(activeLink) {
+  if (!activeLink || window.innerWidth > 768) return;
+  activeLink.scrollIntoView({
+    behavior: 'smooth',
+    block: 'nearest',
+    inline: 'center',
+  });
+}
+
 function setActiveNavLink(activeLink, animate = false) {
   const activeLinkChanged = !activeLink.classList.contains('active');
-  const indicatorMeasurements = activeLinkChanged
-    ? measureNavIndicator(activeLink, animate)
-    : null;
+  if (!activeLinkChanged) return;
 
   navLinks.forEach((link) => {
     link.classList.toggle('active', link === activeLink);
   });
 
-  if (activeLinkChanged) {
-    updateNavIndicator(animate, indicatorMeasurements);
-  }
+  updateNavIndicator(animate);
+  scrollActiveNavLinkIntoView(activeLink);
 }
 
 function getActiveNavLink() {
@@ -449,25 +455,29 @@ function updateNavigationOnScroll() {
   const shouldBeSticky =
     window.innerWidth <= 768 && scrollY >= mobileNavTop;
   const isSticky = navLinksContainer.classList.contains('is-sticky');
+  const stickyStateChanged = shouldBeSticky !== isSticky;
+
+  // Terapkan class sticky TERLEBIH DAHULU agar layout & padding terkini terhitung akurat
+  if (stickyStateChanged) {
+    navLinksContainer.classList.toggle('is-sticky', shouldBeSticky);
+  }
+
   const activeLink = getActiveNavLink();
   const activeLinkChanged =
     activeLink && !activeLink.classList.contains('active');
-  const stickyStateChanged = shouldBeSticky !== isSticky;
-  const indicatorMeasurements =
-    activeLink && (activeLinkChanged || stickyStateChanged)
-      ? measureNavIndicator(activeLink, activeLinkChanged)
-      : null;
-
-  navLinksContainer.classList.toggle('is-sticky', shouldBeSticky);
 
   if (activeLinkChanged) {
     navLinks.forEach((link) => {
       link.classList.toggle('active', link === activeLink);
     });
+    scrollActiveNavLinkIntoView(activeLink);
   }
 
-  if (indicatorMeasurements) {
-    updateNavIndicator(activeLinkChanged, indicatorMeasurements);
+  // Update indikator jika section berganti atau status sticky berubah
+  if (activeLink && (activeLinkChanged || stickyStateChanged)) {
+    // Saat status sticky berubah, snap seketika tanpa animasi melayang (false)
+    const shouldAnimate = activeLinkChanged && !stickyStateChanged;
+    updateNavIndicator(shouldAnimate);
   }
 
   goToTopBtn.classList.toggle('active', scrollY > 300);
@@ -485,24 +495,37 @@ function updateNavigationOnResize() {
 
   if (window.innerWidth > 768 || wasSticky) {
     navLinksContainer.classList.remove('is-sticky');
-    requestAnimationFrame(() => {
-      mobileNavTop =
-        window.innerWidth <= 768
-          ? navLinksContainer.getBoundingClientRect().top + window.scrollY
-          : 0;
-      scheduleNavigationUpdate();
-    });
-    return;
   }
 
-  mobileNavTop =
-    navLinksContainer.getBoundingClientRect().top + window.scrollY;
-  scheduleNavigationUpdate();
+  requestAnimationFrame(() => {
+    mobileNavTop =
+      window.innerWidth <= 768
+        ? navLinksContainer.getBoundingClientRect().top + window.scrollY
+        : 0;
+    scheduleNavigationUpdate();
+    // Hitung ulang posisi indikator seketika untuk layout viewport baru (desktop <-> mobile)
+    updateNavIndicator(false);
+  });
 }
 
 window.addEventListener('scroll', scheduleNavigationUpdate, { passive: true });
 window.addEventListener('resize', updateNavigationOnResize);
 updateNavigationOnResize();
+
+// ResizeObserver memastikan indikator selalu tepat saat ukuran kontainer berubah
+if (typeof ResizeObserver !== 'undefined') {
+  const navResizeObserver = new ResizeObserver(() => {
+    updateNavIndicator(false);
+  });
+  navResizeObserver.observe(navLinksContainer);
+}
+
+// Pastikan font yang selesai dimuat tidak menyebabkan posisi teks dan indikator bergeser
+if (document.fonts) {
+  document.fonts.ready.then(() => {
+    updateNavIndicator(false);
+  });
+}
 
 goToTopBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -973,6 +996,7 @@ btnShippingPrice.addEventListener('click', (event) => {
 // Loader Functionality
 window.addEventListener('load', () => {
   const loader = document.getElementById('loader');
+  updateNavIndicator(false);
 
   // Ensure smooth transition
   setTimeout(() => {
