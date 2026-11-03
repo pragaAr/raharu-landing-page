@@ -379,13 +379,13 @@ function updateNavIndicator(animate = false, measurements = null) {
           transform: `translateX(${currentX}px)`,
           width: `${currentWidth}px`,
           offset: 0,
-          easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)',
+          easing: 'cubic-bezier(0.2, 0.8, 0.25, 1)',
         },
         {
           transform: `translateX(${expandedX}px)`,
           width: `${expandedWidth}px`,
-          offset: 0.65,
-          easing: 'cubic-bezier(0.4, 0, 0.8, 0.4)',
+          offset: 0.5,
+          easing: 'cubic-bezier(0.25, 1, 0.4, 1)',
         },
         {
           transform: `translateX(${targetX}px)`,
@@ -394,11 +394,16 @@ function updateNavIndicator(animate = false, measurements = null) {
         },
       ],
       {
-        duration: 700,
+        duration: 550,
       },
     );
+
+    navIndicatorAnimation.onfinish = () => {
+      navIndicatorAnimation = null;
+    };
   } else {
     navIndicatorAnimation?.cancel();
+    navIndicatorAnimation = null;
   }
 
   navLinksContainer.style.setProperty('--nav-indicator-x', `${targetX}px`);
@@ -413,12 +418,42 @@ requestAnimationFrame(() => navIndicator.classList.add('is-ready'));
 
 function scrollActiveNavLinkIntoView(activeLink) {
   if (!activeLink || window.innerWidth > 768) return;
-  activeLink.scrollIntoView({
+  const targetItem = activeLink.parentElement;
+  if (!targetItem) return;
+
+  const containerWidth = navLinksContainer.clientWidth;
+  const targetScrollLeft =
+    targetItem.offsetLeft - containerWidth / 2 + targetItem.offsetWidth / 2;
+
+  navLinksContainer.scrollTo({
+    left: Math.max(0, targetScrollLeft),
     behavior: 'smooth',
-    block: 'nearest',
-    inline: 'center',
   });
 }
+
+// State untuk mencegah scroll-spy menimpa animasi bentangan saat pengguna klik menu
+let isClickScrolling = false;
+let clickScrollTimer = null;
+
+function startClickScrollLock() {
+  isClickScrolling = true;
+  clearTimeout(clickScrollTimer);
+  clickScrollTimer = setTimeout(() => {
+    isClickScrolling = false;
+  }, 900);
+}
+
+window.addEventListener(
+  'scrollend',
+  () => {
+    if (isClickScrolling) {
+      clearTimeout(clickScrollTimer);
+      isClickScrolling = false;
+      updateNavigationOnScroll();
+    }
+  },
+  { passive: true },
+);
 
 function setActiveNavLink(activeLink, animate = false) {
   const activeLinkChanged = !activeLink.classList.contains('active');
@@ -460,6 +495,15 @@ function updateNavigationOnScroll() {
   // Terapkan class sticky TERLEBIH DAHULU agar layout & padding terkini terhitung akurat
   if (stickyStateChanged) {
     navLinksContainer.classList.toggle('is-sticky', shouldBeSticky);
+  }
+
+  // Jika sedang smooth-scrolling akibat klik menu, pertahankan menu tujuan dan jangan biarkan scroll-spy menginterupsi
+  if (isClickScrolling) {
+    if (stickyStateChanged) {
+      updateNavIndicator(false);
+    }
+    goToTopBtn.classList.toggle('active', scrollY > 300);
+    return;
   }
 
   const activeLink = getActiveNavLink();
@@ -514,8 +558,17 @@ updateNavigationOnResize();
 
 // ResizeObserver memastikan indikator selalu tepat saat ukuran kontainer berubah
 if (typeof ResizeObserver !== 'undefined') {
-  const navResizeObserver = new ResizeObserver(() => {
-    updateNavIndicator(false);
+  let lastNavWidth = navLinksContainer.clientWidth;
+  const navResizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const newWidth = entry.contentRect.width;
+      if (Math.abs(newWidth - lastNavWidth) > 1) {
+        lastNavWidth = newWidth;
+        if (!isClickScrolling) {
+          updateNavIndicator(false);
+        }
+      }
+    }
   });
   navResizeObserver.observe(navLinksContainer);
 }
@@ -534,6 +587,7 @@ goToTopBtn.addEventListener('click', () => {
 // Saat diklik manual, langsung aktif juga (biar terasa responsif)
 navLinks.forEach((link) => {
   link.addEventListener('click', () => {
+    startClickScrollLock();
     setActiveNavLink(link, true);
   });
 });
