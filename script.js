@@ -614,7 +614,7 @@ form.addEventListener('submit', async (e) => {
     trackingNumber.classList.add('error');
     trackingNumber.setAttribute('aria-invalid', 'true');
     trackingNumberError.textContent = trackingCode
-      ? 'Format tidak valid. Masukkan 7 karakter nomor resi diikuti tanggal DDMMYYYY.'
+      ? 'Format nomor resi tidak valid.'
       : 'Nomor resi wajib diisi.';
     trackingNumberError.classList.add('is-visible');
     return;
@@ -639,12 +639,12 @@ form.addEventListener('submit', async (e) => {
     if (!response.ok) {
       const message =
         response.status === 404
-          ? 'Data tidak ditemukan. Periksa nomor resi dan tanggalnya.'
+          ? 'Data tidak ditemukan.'
           : response.status === 422
-            ? 'Format nomor resi tidak valid. Gunakan nomor resi + tanggal DDMMYYYY.'
+            ? 'Format nomor resi tidak valid.'
             : response.status === 429
-              ? 'Terlalu banyak permintaan. Coba lagi sebentar.'
-              : 'Tracking sedang tidak dapat dilakukan. Coba lagi nanti.';
+              ? 'Terlalu banyak permintaan. Coba beberapa saat lagi.'
+              : 'Tracking tidak tersedia. Coba beberapa saat lagi.';
 
       showTrackingModal(trackingCode, null, message);
       return;
@@ -652,7 +652,7 @@ form.addEventListener('submit', async (e) => {
 
     showTrackingModal(trackingCode, result?.data, '');
   } catch (error) {
-    console.error('Gagal menghubungi API tracking:', error);
+    console.error('Gagal menghubungi API:', error);
     showTrackingModal(
       trackingCode,
       null,
